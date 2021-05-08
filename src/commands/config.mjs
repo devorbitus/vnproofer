@@ -20,6 +20,7 @@ export async function handler (argv){
         message: 'What would you like to do?',
         choices: [
             { title: 'Init Config', description: 'Create initial cSpell.json file from template (disabled if already exists)', value: 'createConfig', disabled: cSpellConfigExists },
+            { title: 'Cancel', value: 'cancel'}
         ]
     }
     const answers = await prompt(setupQuestions, {onCancel:cancelHandler, onSubmit:submitHandler});
@@ -27,15 +28,18 @@ export async function handler (argv){
         case "createConfig":
             createInitialConfig();
             break;
+        case "cancel":
+            console.log('Exiting')
+            break;
         default:
             break;
     }
 }
-function cancelHandler(blah){
-    console.log('entered cancelHandler', console.log(JSON.stringify(blah,null,2)));
+function cancelHandler(){
+    console.log('entered cancelHandler');
 }
 async function submitHandler(){
-    console.log('entered submitHandler');
+    // Do nothing
 }
 
 async function createInitialConfig(){
@@ -46,8 +50,10 @@ async function createInitialConfig(){
     if (fs.existsSync('cspell.json')) {
         let hasCharNames = charNames.length > 0;
         const charNameMsg = ' and existing character names have been added to the dictionary';
-        let msg = `Success! cSpell.json file was created from template${hasCharNames ? charNameMsg : ''}!`
+        let msg = `Success! cspell.json file was created from template${hasCharNames ? charNameMsg : ''}!`
         console.log(kleur.cyan(msg));
+    } else {
+        console.log(kleur.red('Unable to create cspell.json file!'))
     }
 }
 
