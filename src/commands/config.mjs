@@ -23,7 +23,6 @@ export async function handler (argv){
         ]
     }
     const answers = await prompt(setupQuestions, {onCancel:cancelHandler, onSubmit:submitHandler});
-    // console.log(answers);
     switch (answers.setupMenu) {
         case "createConfig":
             createInitialConfig();
@@ -65,12 +64,10 @@ async function getTemplateConfig(){
 
 function extractCharacters(){
     const allFilesFiltered = [...find('.').filter(file => file.endsWith('.rpy') )];
-    // console.log('allFilesFiltered', JSON.stringify(allFilesFiltered, null, 2));
     const charNames = [];
     allFilesFiltered.forEach( (file) => {
         let grepResults = grep('--', regex ,file).stdout;
         if(grepResults){
-            // console.log('grepResults', grepResults);
             let m;
             while ((m = regex.exec(grepResults)) !== null) {
                 // This is necessary to avoid infinite loops with zero-width matches
