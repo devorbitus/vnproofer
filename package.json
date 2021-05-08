@@ -1,0 +1,39 @@
+{
+  "name": "vnproofer",
+  "version": "1.0.0",
+  "description": "Command line Visual Novel Proofreading tool",
+  "main": "src/vnproofer.mjs",
+  "scripts": {
+    "start": "node src/vnproofer.mjs",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devorbitus/vnproofer.git"
+  },
+  "keywords": [
+    "command-line",
+    "renpy",
+    "grammar",
+    "gramma",
+    "cspell"
+  ],
+  "author": "Chris Gruel | cgruel@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/devorbitus/vnproofer/issues"
+  },
+  "homepage": "https://github.com/devorbitus/vnproofer#readme",
+  "devDependencies": {
+    "jest": "^26.6.3"
+  },
+  "dependencies": {
+    "cspell": "^5.4.0",
+    "kleur": "^3.0.3",
+    "node-fetch": "^2.6.1",
+    "prompts": "^2.4.1",
+    "shelljs": "^0.8.4",
+    "yargs": "^17.0.1"
+  },
+  "type": "module"
+}
