@@ -19,7 +19,8 @@ export async function handler (argv){
         name: 'setupMenu',
         message: 'What would you like to do?',
         choices: [
-            { title: 'Init Config', description: 'Create initial cSpell.json file from template (disabled if already exists)', value: 'createConfig', disabled: cSpellConfigExists },
+            { title: 'Initial Config', description: 'Create initial cSpell.json file from template (disabled if already exists)', value: 'createConfig', disabled: cSpellConfigExists },
+            { title: 'Update character exclusions', description: 'Add any new characters to workspace dictionary list', value: 'updateChar', disabled: !cSpellConfigExists },
             { title: 'Cancel', value: 'cancel'}
         ]
     }
@@ -30,6 +31,9 @@ export async function handler (argv){
             break;
         case "cancel":
             console.log('Exiting')
+            break;
+        case "updateChar":
+            updateCharConfig();
             break;
         default:
             break;
@@ -87,5 +91,22 @@ function extractCharacters(){
         }
     });
     return charNames;
+}
+
+function updateCharConfig(){
+    let charNames = extractCharacters();
+    let configJsonString = fs.readFileSync('cspell.json');
+    let configJson = JSON.parse(configJsonString);
+    let existingWords = configJson.words;
+    let updatedWordList = [...new Set([].concat(existingWords, charNames))].sort();
+    let wordCountDiff = updatedWordList.length - existingWords.length
+    configJson.words = updatedWordList;
+    
+    if(wordCountDiff !== 0){
+        fs.writeFileSync('cspell.json',JSON.stringify(configJson,null,2));
+        console.log(kleur.cyan(`Successfully added ${wordCountDiff} new character${wordCountDiff > 1 ? 's':''}!`));
+    } else {
+        console.log(kleur.yellow('No new characters found to add so nothing to do'));
+    }
 }
 
