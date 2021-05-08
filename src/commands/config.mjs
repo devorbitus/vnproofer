@@ -13,7 +13,8 @@ export const aliases = ['a'];
 
 export async function handler (argv){
     let cSpellConfigExists = fs.existsSync('cspell.json');
-    
+    console.log(kleur.green('Configuration Menu:'));
+    console.log('');
     let setupQuestions = {
         type: 'select',
         name: 'setupMenu',
@@ -39,9 +40,10 @@ export async function handler (argv){
         default:
             break;
     }
+    return argv;
 }
 function cancelHandler(){
-    console.log('entered cancelHandler');
+    console.log('User cancelled.');
 }
 async function submitHandler(){
     // Do nothing
