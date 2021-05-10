@@ -29,12 +29,14 @@
   },
   "dependencies": {
     "cli-progress": "^3.9.0",
-    "cspell": "^5.4.0",
     "kleur": "^3.0.3",
     "node-fetch": "^2.6.1",
     "prompts": "^2.4.1",
     "shelljs": "^0.8.4",
     "yargs": "^17.0.1"
   },
-  "type": "module"
+  "type": "module",
+  "bin": {
+    "vnproofer": "src/vnproofer.mjs"
+  }
 }

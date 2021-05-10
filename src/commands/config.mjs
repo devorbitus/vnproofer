@@ -25,7 +25,7 @@ export async function handler (argv){
         message: 'What would you like to do?',
         initial: cSpellConfigExists ? 1 : 0,
         choices: [
-            { title: 'Initial Config', description: 'Create initial cSpell.json file from template (disabled if already exists)', value: 'createConfig', disabled: cSpellConfigExists },
+            { title: 'Initial Config', description: 'Create initial cspell.json file from template (disabled if already exists)', value: 'createConfig', disabled: cSpellConfigExists },
             { title: 'Update character exclusions', description: 'Add any new characters to workspace dictionary list', value: 'updateChar', disabled: !cSpellConfigExists },
             { title: 'Cancel', value: 'cancel'}
         ]

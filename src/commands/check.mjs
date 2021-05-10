@@ -27,6 +27,6 @@ export async function handler (argv) {
         console.log(kleur.red("There is no such file!"))
         process.exit(1)
     }
-    var shellCheck = exec("./node_modules/.bin/cspell '**/*.rpy'").stdout;
-    console.log("shellCheck", shellCheck);
+    var shellCheck = exec("cspell '**/*.rpy'").stdout;
+    // console.log("shellCheck", shellCheck);
 }
