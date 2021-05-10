@@ -3,9 +3,13 @@ import fs from "fs";
 import fetch from 'node-fetch';
 import prompt from 'prompts';
 import shelljs from 'shelljs';
+import cliProgress from 'cli-progress';
 const { echo, grep, find } = shelljs;
 const templateUrl = "https://raw.githubusercontent.com/devorbitus/vnproofer/main/cspell.empty.json"
-const regex = /Character\("([\w|\[|\]]+)"/gm;
+const charRegex = /define(?:\s+)?(?<charDef>\w+)?\s+=\s+Character(?:\(_)?(?:\s+)?\((?:\s+)?["|'](?<charName>[\w|\[|\]]+)["|']/gm;
+const nickNamesRegex = /["|'].+\[(?<nickName>\w+)\].+["|']/gm;
+const dialogRegex = /^(?:\s+)?(?:\w+(?:\s+)?){0,3}["|'].+["|']/gm;
+const variableRegex = /^\s+\$(?:\s+)?(?<varName>\w+)(?:\s+)?=(?:\s+)?["|']\w+["|']/gm
 
 export const command = "config";
 export const describe = "Configure vnproofer";
@@ -32,7 +36,7 @@ export async function handler (argv){
             createInitialConfig();
             break;
         case "cancel":
-            console.log('Exiting')
+            console.log('Exiting');
             break;
         case "updateChar":
             updateCharConfig();
@@ -49,19 +53,23 @@ async function submitHandler(){
     // Do nothing
 }
 
-async function createInitialConfig(){
-    let charNames = extractCharacters();
-    let templateConfigJson = await getTemplateConfig();
-    templateConfigJson.words.push(...charNames);
-    fs.writeFileSync('cspell.json',JSON.stringify(templateConfigJson,null,2));
-    if (fs.existsSync('cspell.json')) {
-        let hasCharNames = charNames.length > 0;
-        const charNameMsg = ' and existing character names have been added to the dictionary';
-        let msg = `Success! cspell.json file was created from template${hasCharNames ? charNameMsg : ''}!`
-        console.log(kleur.cyan(msg));
-    } else {
-        console.log(kleur.red('Unable to create cspell.json file!'))
+class RenPyFileHandler {
+    handle;
+    resultArray;
+    finalize;
+    constructor(handle, resultArray, finalize) {
+        this.handle = handle;
+        this.resultArray = resultArray;
+        this.finalize = finalize;
     }
+}
+
+async function createInitialConfig(){
+    loopThroughRenpyFiles([new RenPyFileHandler(characterHandler,[],charSummaryHandler)], {initial: true});
+}
+
+function updateCharConfig(){
+    loopThroughRenpyFiles([new RenPyFileHandler(characterHandler,[],charSummaryHandler)], {initial: false});
 }
 
 async function getTemplateConfig(){
@@ -75,41 +83,96 @@ async function getTemplateConfig(){
     return templateJson;
 }
 
-function extractCharacters(){
+function loopThroughRenpyFiles(handlers, options){
     const allFilesFiltered = [...find('.').filter(file => file.endsWith('.rpy') )];
-    const charNames = [];
-    allFilesFiltered.forEach( (file) => {
-        let grepResults = grep('--', regex ,file).stdout;
-        if(grepResults){
-            let m;
-            while ((m = regex.exec(grepResults)) !== null) {
-                // This is necessary to avoid infinite loops with zero-width matches
-                if (m.index === regex.lastIndex) {
-                    regex.lastIndex++;
-                }
-                let charName = m[1];
-                let filteredCharName = charName.replace(/[\[\]]/g,'');
-                charNames.push(filteredCharName);
-            }
-        }
+    const rpyFileBar = new cliProgress.SingleBar({stopOnComplete:true}, cliProgress.Presets.shades_classic);
+    let totalCount = allFilesFiltered.length;
+    rpyFileBar.start(totalCount, 0);
+    allFilesFiltered.forEach( (file, ind) => {
+        rpyFileBar.update(ind + 1);
+        handlers.forEach( handler => handler.handle(file, handler));
     });
-    return charNames;
+    handlers.forEach( handler => handler.finalize(options, handler));
+    rpyFileBar.stop();
 }
 
-function updateCharConfig(){
-    let charNames = extractCharacters();
-    let configJsonString = fs.readFileSync('cspell.json');
-    let configJson = JSON.parse(configJsonString);
-    let existingWords = configJson.words;
-    let updatedWordList = [...new Set([].concat(existingWords, charNames))].sort();
-    let wordCountDiff = updatedWordList.length - existingWords.length
-    configJson.words = updatedWordList;
-    
-    if(wordCountDiff !== 0){
-        fs.writeFileSync('cspell.json',JSON.stringify(configJson,null,2));
-        console.log(kleur.cyan(`Successfully added ${wordCountDiff} new character${wordCountDiff > 1 ? 's':''}!`));
+async function charSummaryHandler(options, charHandler){
+    const charNamesRaw = charHandler.resultArray;
+    const charNames = [...new Set([].concat(charNamesRaw))].sort();
+    charHandler.resultArray = charNames;
+    if (options.initial) {
+        let templateConfigJson = await getTemplateConfig();
+        templateConfigJson.words.push(...charNames);
+        fs.writeFileSync('cspell.json',JSON.stringify(templateConfigJson,null,2));
+        if (fs.existsSync('cspell.json')) {
+            let hasCharNames = charNames.length > 0;
+            const charNameMsg = ' and existing character names have been added to the dictionary';
+            let msg = `Success! cspell.json file was created from template${hasCharNames ? charNameMsg : ''}!`;
+            console.log(kleur.cyan(msg));
+        } else {
+            console.log(kleur.red('Unable to create cspell.json file!'));
+        }
     } else {
-        console.log(kleur.yellow('No new characters found to add so nothing to do'));
+        let configJsonString = fs.readFileSync('cspell.json');
+        if(configJsonString){
+            let configJson = JSON.parse(configJsonString);
+            let existingWords = configJson.words;
+            let updatedWordList = [...new Set([].concat(existingWords, charNames))].sort();
+            let wordCountDiff = updatedWordList.length - existingWords.length;
+            configJson.words = updatedWordList;
+            console.log('');
+            if(wordCountDiff !== 0){
+                fs.writeFileSync('cspell.json',JSON.stringify(configJson,null,2));
+                console.log(kleur.cyan(`Successfully added ${wordCountDiff} new character${wordCountDiff > 1 ? 's':''}!`));
+            } else {
+                console.log(kleur.yellow('No new characters found to add so nothing to do'));
+            }
+        } else {
+            console.log(kleur.red('Unable to read cspell.json file!'));
+        }
     }
 }
 
+function characterHandler(file, charHandler){
+    const charNamesArray = charHandler.resultArray;
+    const declaredCharNames = extractCharacters(extractInformation(file, charRegex), charNamesArray);
+    const charNickNames = extractCharacters(extractInformation(file, nickNamesRegex), charNamesArray);
+    const charNames = [...new Set([].concat(declaredCharNames, charNickNames))].sort();
+    handler.resultArray = charNames;
+}
+
+function extractCharacters(charMatches, charNames){
+    for (const m of charMatches) {
+        if ('charName' in m.groups) {
+            let charName = m.groups.charName;
+            let filteredCharName = charName.replace(/[\[\]]/g, '').toLowerCase();
+            if (filteredCharName) charNames.push(filteredCharName);
+        }
+        if ('charDef' in m.groups) {
+            let charVar = m.groups.charDef;
+            if (charVar) charNames.push(charVar.toLowerCase());
+        }
+        if('nickName' in m.groups) {
+            let charNickName = m.groups.nickName;
+            if (charNickName) charNames.push(charNickName);
+        }
+    }
+    const cleanCharNames = [...new Set([].concat(charNames))];
+    return cleanCharNames;
+}
+
+function extractInformation(file, searchRegex, confirmRegex) {
+    let grepResults = grep('--', searchRegex, file).stdout;
+    const matches = [];
+    if (grepResults) {
+        let m;
+        while ((m = searchRegex.exec(grepResults)) !== null) {
+            // This is necessary to avoid infinite loops with zero-width matches
+            if (m.index === searchRegex.lastIndex) {
+                searchRegex.lastIndex++;
+            }
+            matches.push(m);
+        }
+    }
+    return matches;
+}
