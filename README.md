@@ -36,7 +36,7 @@ VNProofer is a Command-line Ren'Py Visual Novel proofreading tool.
 
 ### Via NPM
 
-You should have Node.js and NPM already installed (or you are willing to do it).
+It would be best to have Node.js and NPM already installed (or you are willing to do it).
 
 #### Global installation:
 
