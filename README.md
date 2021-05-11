@@ -44,13 +44,7 @@ It would be best to have Node.js and NPM already installed (or you are willing t
 #### Global installation:
 
 ```
-npm i vnproofer -g
-```
-
-#### Local installation (as a dev tool for your project):
-
-```
-npm i vnproofer -D
+npm i vnproofer cspell -g
 ```
 
 ## Usage
