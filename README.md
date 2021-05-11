@@ -31,6 +31,7 @@ VNProofer is a Command-line Ren'Py Visual Novel proofreading tool.
  - VNProofer is designed to work with a codebase of `*.rpy` files in any directory structure from the root.
     - `*.rpa` files will need to be decompressed
     - `*.rpyc` files will need to be decompressed
+ - A copy of cspell must have been installed globally `npm i cspell -g`
 
 ## Installation
 
