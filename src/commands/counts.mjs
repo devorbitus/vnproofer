@@ -59,8 +59,8 @@ export async function handler(argv) {
             }
         }
         console.log(kleur.cyan(` Words added to repo since ${since} today `));
-        console.log(kleur.cyan(` Total Words added to repo          : ${totalWords}`));
-        console.log(kleur.cyan(` Total Dialog Words added to repo   : ${totalDialogueWords}`));
+        console.log(kleur.cyan(` Total Words added to repo            : ${totalWords}`));
+        console.log(kleur.cyan(` Total Dialogue Words added to repo   : ${totalDialogueWords}`));
     } else {
         console.log(kleur.red('A global installation of git is required!'));
     }
