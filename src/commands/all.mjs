@@ -1,4 +1,5 @@
 import shelljs from 'shelljs';
+import kleur from "kleur";
 const { which, exec } = shelljs;
 const regex = /^(?<filePath>.+):(?<lineNumber>\d+):(?<columnNumber>\d+) - .+\((?<misspelledWord>\w+)\)/gm;
 
