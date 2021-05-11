@@ -136,3 +136,6 @@ vnproofer n
 - [ ] Ability to run a line of dialogue through a command-line grammatical tool like [gramma](https://caderek.github.io/gramma/)
 - [ ] Ability to install global cSpell installation through config menu if not already installed
 - [ ] Ability to install global gramma installation through config menu if not already installed
+- [ ] Ability to extract from `*.rpa` files
+- [ ] Ability to extract from `*.rpyc` files
+- [ ] Ability to automatically generate a corrections file to be sent to an author to facilitate automatically correcting issues
