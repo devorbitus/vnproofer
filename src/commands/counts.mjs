@@ -17,7 +17,7 @@ export async function handler(argv) {
     let whichGit = which('git');
     let totalWords = 0;
     let totalDialogueWords = 0;
-    if (whichGit.code == 0) {
+    if (whichGit?.code == 0) {
         let currentBranch = exec('git branch --show-current', { silent: true }).stdout;
         let gitCmd = `git rev-list --since ${since} ${currentBranch}`;
         let revList = exec(gitCmd, { silent: true }).stdout;
@@ -58,9 +58,9 @@ export async function handler(argv) {
                 }
             }
         }
-        console.log(kleur.cyan(` Words added since ${since} today `));
-        console.log(kleur.cyan(` Total Words added          : ${totalWords}`));
-        console.log(kleur.cyan(` Total Dialog Words added   : ${totalDialogueWords}`));
+        console.log(kleur.cyan(` Words added to repo since ${since} today `));
+        console.log(kleur.cyan(` Total Words added to repo            : ${totalWords}`));
+        console.log(kleur.cyan(` Total Dialogue Words added to repo   : ${totalDialogueWords}`));
     } else {
         console.log(kleur.red('A global installation of git is required!'));
     }
