@@ -8,6 +8,7 @@ import { commands } from './commands/index.mjs';
 yargs(hideBin(process.argv))
     .command(commands)
     .alias("h", "help")
+    .scriptName('vnproofer')
     .version(`v${version}`)
     .alias("version", "v")
     .option("suppress-intro", {
