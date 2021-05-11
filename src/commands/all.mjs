@@ -11,6 +11,6 @@ export async function handler (argv){
     if(cSpellWhich?.code !== 0){
         console.log(kleur.red('A global installation of cspell is required! Install using \"npm install -g cspell\"'));
     } else {
-        exec("cspell '**/*.rpy'", {silent:false}).stdout;
+        exec('cspell --show-context --no-progress "**/*.rpy"', {silent:false}).stdout;
     }
 }

@@ -27,6 +27,6 @@ export async function handler (argv) {
         console.log(kleur.red("There is no such file!"))
         process.exit(1)
     }
-    var shellCheck = exec("cspell '**/*.rpy'").stdout;
+    var shellCheck = exec(`cspell --show-context ${argv.file}`).stdout;
     // console.log("shellCheck", shellCheck);
 }
