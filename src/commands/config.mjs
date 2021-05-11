@@ -13,7 +13,6 @@ const variableRegex = /^\s+\$(?:\s+)?(?<varName>\w+)(?:\s+)?=(?:\s+)?["|']\w+["|
 
 export const command = "config";
 export const describe = "Configure vnproofer";
-export const aliases = ['a'];
 
 export async function handler (argv){
     let cSpellConfigExists = fs.existsSync('cspell.json');
