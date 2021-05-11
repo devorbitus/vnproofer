@@ -19,6 +19,8 @@ VNProofer is a Command-line Ren'Py Visual Novel proofreading tool.
         - [Command](#command)
     - [All](#all)
         - [Command](#command)
+    - [Counts](#counts)
+        - [Command](#command)
 - [Todo](#todo)
 <!-- /TOC -->
 
@@ -91,6 +93,10 @@ Check an individual file for spelling errors
 ```
 vnproofer check ./myfile.rpy
 ```
+or
+```
+vnproofer c ./myfile.rpy
+```
 
 ### All
 
@@ -100,9 +106,26 @@ Perform a complete spell check of all rpy files using cSpell
 ```
 vnproofer all
 ```
+or
+```
+vnproofer a
+```
+
+### Counts
+
+Query git to find out how many words and how many dialogue words have been committed since 1 am today
+
+#### Command
+```
+vnproofer counts
+```
+or
+```
+vnproofer n
+```
 
 ## Todo
-- [ ] Utility to show how many words added as well as how many dialog words have been added today by pulling all changes added to a git repo
+- [x] Utility to show how many words added as well as how many dialog words have been added today by pulling all changes added to a git repo
 - [ ] Ability to automatically add the [cSpell GitHub action](https://github.com/marketplace/actions/cspell-action) to an existing codebase
 - [ ] Ability to add words misspelled on purpose to an exclusion list at the top of the file
 - [ ] Ability to add file-level excluded words to the local dictionary if the exclusion is used in more than one file and remove the local exclusion from all files
