@@ -1,17 +1,19 @@
 import shelljs from 'shelljs';
 import kleur from 'kleur';
 import fs from 'fs';
-import readline from 'readline';
-
+import parseDiff from 'parse-diff';
+import esr from 'escape-string-regexp';
+import ln from 'line-number';
 const { which, exec, pwd } = shelljs;
 export const command = "counts";
 export const describe = "Query git to find out how many words have been committed today";
 export const aliases = ['n'];
-const since = "1am"
+const since = "'1am'";
 const addLineRegex = /^\+[^\+]/g;
 const dialogRegex = /^(?:\s+)?(?:\w+(?:\s+)?){0,3}["|'](?<dialogue>.+)["|'](?:\s+)?$/m;
 const unifiedDiffRegex = /^@@ -(?<oldLineNbr>\d+),?(?<oldNumberOfLines>\d+)?\s\+(?<newLineNumber>\d+),?(?<newNumberOfLines>\d+)? @@/gm;
 const diffFileRegex = /^\+\+\+\sb\/(?<filePath>.+\.rpy)/gmi;
+const MINIMUM_WORD_COUNT = 4;
 
 export async function handler(argv) {
     let whichGit = which('git');
@@ -21,42 +23,47 @@ export async function handler(argv) {
         let currentBranch = exec('git branch --show-current', { silent: true }).stdout;
         let gitCmd = `git rev-list --since ${since} ${currentBranch}`;
         let revList = exec(gitCmd, { silent: true }).stdout;
-        const revListArray = revList.split('\n').filter(item => item !== "");
-        for (const sha of revListArray) {
-            // console.log(sha)
-            let diffs = exec(`git diff -U0 --word-diff=porcelain ${sha}~1..${sha} 2>&1`, { silent: true }).stdout;
+        const revListArray = revList.split('\n').filter(item => item !== "") || [];
+        // console.log('revListArray', JSON.stringify(revListArray, null, 2))
+        if (revListArray.length) {
+            let cwd = pwd().stdout;
+            let newestCommit = revListArray[revListArray.length - 1];
+            let oldestCommit = revListArray[0];
+            let diffs = exec(`git diff -U0 --word-diff=porcelain ${newestCommit}~1..${oldestCommit} 2>&1`, { silent: true }).stdout;
             // console.log(diffs);
-            let diffsList = diffs.split('\n').filter(item => item !== "");
-            for (let index = 0; index < diffsList.length; index++) {
-                const diffLine = diffsList[index];
-                if (addLineRegex.test(diffLine)) {
-                    let diffLineWordCount = wordCount(diffLine);
-                    totalWords += diffLineWordCount;
-                    // console.log(`|${diffLine}|`)
-                    let uniDiffObj = climbTheArrayIndex(diffsList, index, unifiedDiffRegex);
-                    if (uniDiffObj.diffLineIndex > -1) {
-                        // console.log('uniDiffObj', JSON.stringify(uniDiffObj, null, 2));
-                        let fileNameObj = climbTheArrayIndex(diffsList, uniDiffObj.diffLineIndex + 1, diffFileRegex);
-                        if (fileNameObj.diffLineIndex > -1) {
-                            // console.log('fileNameObj', JSON.stringify(fileNameObj, null, 2))
-                            // console.log('filePath', fileNameObj.matches.groups.filePath, 'lineNumber', uniDiffObj.matches.groups.newLineNumber);
-                            let cwd = pwd().stdout;
-                            // console.log('cwd', cwd);
-                            let fullPath = `${cwd}/${fileNameObj.matches.groups.filePath}`;
-                            // console.log('fullPath', fullPath);
-                            let lineChanged = await readLineAt(fullPath, uniDiffObj.matches.groups.newLineNumber);
-                            // console.log('lineChanged', lineChanged);
-                            if (lineChanged) {
-                                if (dialogRegex.test(lineChanged)) {
-                                    // console.log('Dialogue found');
-                                    totalDialogueWords += diffLineWordCount;
-                                }
-                            }
+            let files = parseDiff(diffs);
+            let rpyFiles = files.filter(diff => diff.to.toLowerCase().endsWith('.rpy') && diff.additions > 0);
+            let filteredRpyFiles = rpyFiles.map(diff => {
+                let fileContents = fs.readFileSync(diff.to, 'utf8');
+                // console.log('diff', JSON.stringify(diff, null, 2));
+                let chunks = diff.chunks;
+                let newChunks = chunks.map(chunk => {
+                    let chunkChanges = chunk.changes.filter(change => change.type == "normal" || change.type == "add");
+                    chunk.changes = chunkChanges.map(chunk => {
+                        let newChunk = chunk;
+                        newChunk.dialogueWordCount = 0;
+                        newChunk.wordCount = wordCount(newChunk.content);
+                        if (newChunk.type === "add") {
+                            newChunk.content = newChunk.content.substring(0,1) === "+" ? newChunk.content.substring(1) : newChunk.content;
+                            newChunk.dialogueWordCount = dialogRegex.test(newChunk.content) ? newChunk.wordCount : 0;
                         }
-                    }
-                    // console.log('ind', index);
-                }
-            }
+                        if (newChunk.wordCount >= MINIMUM_WORD_COUNT && newChunk.dialogueWordCount == 0) {
+                            // no dialogue words found but could maybe check the line the words are on in the file
+                            let wordCount = dialogueWordCount(fileContents, newChunk.content);
+                            newChunk.dialogueWordCount = wordCount;
+                        }
+                        return newChunk;
+                    });
+                    return chunk;
+                });
+                diff.chunks = newChunks;
+                return diff;
+            });
+            console.log('filteredRpyFiles', JSON.stringify(filteredRpyFiles, null, 2));
+            totalDialogueWords = subTotalWordCount(filteredRpyFiles, true);
+            totalWords = subTotalWordCount(filteredRpyFiles, false);
+        } else {
+            console.log(kleur.yellow('No commits found'));
         }
         console.log(kleur.cyan(` Words added to repo since ${since} today `));
         console.log(kleur.cyan(` Total Words added to repo            : ${totalWords}`));
@@ -67,65 +74,42 @@ export async function handler(argv) {
     return argv;
 }
 
-async function readLineAt(filePath, lineNumber) {
-    let line;
-    let cursor = 0;
-    let zeroBasedLineNumber = lineNumber - 1;
-    if(fs.existsSync(filePath)){
-        try {
-            const rl = readline.createInterface({
-                input: fs.createReadStream(filePath),
-                crlfDelay: Infinity
-            });
-            for await (const theLine of rl){
-                if(cursor == zeroBasedLineNumber){
-                    let cleanLine = theLine.replace(/[^\x20-\x7E]+/g, ''); // remove non-visible characters
-                    // console.log(`Line from file ${cursor + 1}: ${cleanLine}`);
-                    rl.close();
-                    line = cleanLine;
-                }
-                cursor++;
-            }
-        } catch (error) {
-            console.error(new Error(`Unable to read line ${zeroBasedLineNumber} from file ${filePath}`, error))
+function subTotalWordCount(filteredRpyFiles,isDialog = false){
+    let totalWords = 0;
+    function changeReducer(innerInnerSum, changeObj){
+        if (isDialog) {
+            return changeObj.dialogueWordCount + innerInnerSum;
+        } else {
+            return changeObj.wordCount + innerInnerSum;
         }
-    } else {
-        console.log(kleur.underline().red(`File ${filePath} does not exist.`));
     }
-    return line;
+    function chunkReducer(innerSum, chunkObj) {
+        let changeCount = chunkObj.changes.reduce(changeReducer, 0);
+        return changeCount + innerSum;
+    }
+    function diffFileObjReducer(accumulator, diffFileObj) {
+        let chunkCount = diffFileObj.chunks.reduce(chunkReducer, 0);
+        return chunkCount + accumulator;
+    }
+    totalWords = filteredRpyFiles.reduce(diffFileObjReducer,0);
+    return totalWords;
 }
 
-function climbTheArrayIndex(array, startingIndex, regexPattern) {
-    let proposedDiffLineIndex = startingIndex;
-    let diffLineIndex = -1;
-    let giveUp = false;
-    let m;
-    while (!giveUp) {
-        let checkDiffLineIndex = --proposedDiffLineIndex;
-        if (checkDiffLineIndex < 0) {
-            giveUp = true;
-            break;
-        }
-        let proposedDiffLine = array[checkDiffLineIndex];
-        if (regexPattern.test(proposedDiffLine)) {
-            // console.log(proposedDiffLine);
-            diffLineIndex = checkDiffLineIndex;
-            while ((m = regexPattern.exec(proposedDiffLine)) !== null) {
-                // This is necessary to avoid infinite loops with zero-width matches
-                if (m.index === regexPattern.lastIndex) {
-                    regexPattern.lastIndex++;
-                }
-                break;
+function dialogueWordCount(fileContents, stringToCheck = ""){
+    let dialogueWordCount = 0;
+    const trimmedStringToCheck = stringToCheck.trim();
+    const searchRegexString = esr(trimmedStringToCheck);
+    const searchRegex = new RegExp(searchRegexString);
+    if (fileContents) {
+        let lineMatches = ln(fileContents,searchRegex);
+        if (lineMatches.length) {
+            let isDialogue = lineMatches.some(lineMatch => dialogRegex.test(lineMatch.line));
+            if (isDialogue) {
+                dialogueWordCount = wordCount(trimmedStringToCheck);
             }
-            m = regexPattern.exec(proposedDiffLine);
-            giveUp = true;
-            break;
         }
     }
-    return {
-        diffLineIndex: diffLineIndex,
-        matches: m
-    };
+    return dialogueWordCount;
 }
 
 function wordCount(str) {
