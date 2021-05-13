@@ -17,12 +17,6 @@ yargs(hideBin(process.argv))
         default: false,
         describe: "Suppress intro of command"
     })
-    .option("suppress-cspell-summary", {
-        alias: "u",
-        type: "boolean",
-        default: false,
-        describe: "Suppress cSpell Summary"
-    })
     .wrap(90)
     .demandCommand()
     .help()
