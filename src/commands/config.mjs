@@ -112,7 +112,7 @@ async function charSummaryHandler(options, charHandler){
             console.log(kleur.red('Unable to create cspell.json file!'));
         }
     } else {
-        let configJsonString = fs.readFileSync('cspell.json');
+        let configJsonString = fs.readFileSync('cspell.json', 'utf8');
         if(configJsonString){
             let configJson = JSON.parse(configJsonString);
             let existingWords = configJson.words;
