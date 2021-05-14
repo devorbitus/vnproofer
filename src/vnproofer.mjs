@@ -2,7 +2,7 @@
 
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { version } from 'version';
+import { version } from './version.mjs';
 import { commands } from './commands/index.mjs';
 
 yargs(hideBin(process.argv))
