@@ -67,7 +67,7 @@ export function printSpellingLines(lines) {
 export function cSpellExistsChecker(callbackFunc) {
   var cSpellWhich = which('cspell');
   if (cSpellWhich?.code !== 0) {
-    console.log(kleur.red('A global installation of cspell is required! Install using \"npm install -g cspell\"'));
+    console.log(kleur.red('A global installation of cspell is required! Install using "npm install -g cspell"'));
   } else {
     callbackFunc();
   }
