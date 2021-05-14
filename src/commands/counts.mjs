@@ -8,7 +8,21 @@ const { which, exec, pwd } = shelljs;
 export const command = "counts";
 export const describe = "Query git to find out how many words have been committed today";
 export const aliases = ['n'];
-const since = "'1am'";
+export function builder (yargs) {
+    yargs.option('only-me', {
+        alias: "m",
+        type: "boolean",
+        default: false,
+        describe: "Only show my own counts"
+    });
+    yargs.option('verbose', {
+        alias: "b",
+        type: "boolean",
+        default: false,
+        describe: "Show detailed logs of changes with word counts for examination"
+    })
+}
+const since = "1am";
 const addLineRegex = /^\+[^\+]/g;
 const dialogRegex = /^(?:\s+)?(?:\w+(?:\s+)?){0,3}["|'](?<dialogue>.+)["|'](?:\s+)?$/m;
 const unifiedDiffRegex = /^@@ -(?<oldLineNbr>\d+),?(?<oldNumberOfLines>\d+)?\s\+(?<newLineNumber>\d+),?(?<newNumberOfLines>\d+)? @@/gm;
@@ -20,8 +34,20 @@ export async function handler(argv) {
     let totalWords = 0;
     let totalDialogueWords = 0;
     if (whichGit?.code == 0) {
+        if (!argv.suppressIntro) {
+            console.log(kleur.yellow('Looking up git commit history...'));
+        }
         let currentBranch = exec('git branch --show-current', { silent: true }).stdout;
-        let gitCmd = `git rev-list --since ${since} ${currentBranch}`;
+        // console.log('argv', JSON.stringify(argv,null,2))
+        let authorRestriction = "";
+        if (argv.onlyMe) {
+            let currentAuthor = exec(`git config user.name`, { silent: true }).stdout;
+            if (currentAuthor) {
+                console.log(kleur.magenta(`Filtering only commits by author ${currentAuthor}`))
+                authorRestriction = `--author '${currentAuthor}'`
+            }
+        }
+        let gitCmd = `git rev-list ${authorRestriction} --since '${since}' ${currentBranch}`;
         let revList = exec(gitCmd, { silent: true }).stdout;
         const revListArray = revList.split('\n').filter(item => item !== "") || [];
         // console.log('revListArray', JSON.stringify(revListArray, null, 2))
@@ -59,7 +85,9 @@ export async function handler(argv) {
                 diff.chunks = newChunks;
                 return diff;
             });
-            console.log('filteredRpyFiles', JSON.stringify(filteredRpyFiles, null, 2));
+            if (argv.verbose) {
+                console.log('All files changed', JSON.stringify(filteredRpyFiles, null, 2));
+            }
             totalDialogueWords = subTotalWordCount(filteredRpyFiles, true);
             totalWords = subTotalWordCount(filteredRpyFiles, false);
         } else {
