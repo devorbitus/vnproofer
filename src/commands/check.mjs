@@ -24,11 +24,11 @@ export async function handler(argv) {
     }
 
     if (!fs.existsSync(argv.file) || argv.file === "." || argv.file === "..") {
-        console.log('argv', JSON.stringify(argv,null,2))
+        console.log('argv', JSON.stringify(argv, null, 2))
         console.log(kleur.red(`File [ ${argv.file} ] does not exist.`))
         process.exit(1)
     }
-    cSpellExistsChecker(function cSpellExistsCheckerCheckCommandSuccess(){
+    cSpellExistsChecker(function cSpellExistsCheckerCheckCommandSuccess() {
         // should we suppress intro
         if (!argv.suppressIntro) {
             console.log(kleur.yellow(`Checking file [ ${argv.file} ] for spelling errors...`));

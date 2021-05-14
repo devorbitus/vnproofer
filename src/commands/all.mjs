@@ -7,7 +7,7 @@ export const command = "all";
 export const describe = "perform full spell check of all rpy files";
 export const aliases = ['a'];
 export async function handler(argv) {
-    cSpellExistsChecker(function cSpellExistsCheckerAllCommandSuccess(){
+    cSpellExistsChecker(function cSpellExistsCheckerAllCommandSuccess() {
         // should we suppress intro
         if (!argv.suppressIntro) {
             console.log(kleur.yellow('Checking all files for spelling errors...'));
