@@ -10,19 +10,19 @@ VNProofer is a Command-line Ren'Py Visual Novel proofreading tool.
 - [Usage](#usage)
   - [Help Menu](#help-menu)
   - [Config](#config)
-    - [Command](#command)
-    - [Help](#help)
+    - [Config Command](#config-command)
+    - [Config Help](#config-help)
       - [Sub Commands](#sub-commands)
         - [Initial Config](#initial-config)
         - [Update character exclusions](#update-character-exclusions)
   - [Check](#check)
-    - [Command](#command)
+    - [Check Command](#check-command)
   - [All](#all)
-    - [Command](#command)
-    - [Help](#help)
+    - [All Command](#all-command)
+    - [All Help](#all-help)
   - [Counts](#counts)
-    - [Command](#command)
-    - [Help](#help)
+    - [Counts Command](#counts-command)
+    - [Counts Help](#counts-help)
 - [Todo](#todo)
 <!-- /TOC -->
 
@@ -66,11 +66,11 @@ vnproofer all -h
 
 Displays the configuration menu
 
-#### Command
+#### Config Command
 ```
 vnproofer config
 ```
-#### Help
+#### Config Help
 ```
 $ vnproofer config --help
 vnproofer config
@@ -97,7 +97,7 @@ Add any new characters to the workspace dictionary list that were not previously
 
 Check an individual file for spelling errors
 
-#### Command
+#### Check Command
 ```
 vnproofer check ./myfile.rpy
 ```
@@ -110,7 +110,7 @@ vnproofer c ./myfile.rpy
 
 Perform a complete spell check of all rpy files using cSpell
 
-#### Command
+#### All Command
 ```
 vnproofer all
 ```
@@ -119,7 +119,7 @@ or
 vnproofer a
 ```
 
-#### Help
+#### All Help
 ```
 $ vnproofer all --help
 vnproofer all
@@ -136,7 +136,7 @@ Options:
 
 Query git to find out how many words and how many dialogue words have been committed since 1 am today
 
-#### Command
+#### Counts Command
 ```
 vnproofer counts
 ```
@@ -144,7 +144,7 @@ or
 ```
 vnproofer n
 ```
-#### Help
+#### Counts Help
 
 ```
 $ vnproofer counts --help
