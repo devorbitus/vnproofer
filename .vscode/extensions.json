@@ -1,0 +1,14 @@
+{
+    "recommendations": [
+        "howardzuo.vscode-git-tags",
+        "naumovs.color-highlight",
+        "oderwat.indent-rainbow",
+        "ms-vsliveshare.vsliveshare-pack",
+        "robole.marky-markdown",
+        "redlin.remove-tabs-on-save",
+        "luquedaniel.languague-renpy",
+        "visualstudioexptteam.vscodeintellicode",
+        "streetsidesoftware.code-spell-checker",
+        "znck.grammarly"
+    ]
+}
