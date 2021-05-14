@@ -25,13 +25,14 @@
   },
   "homepage": "https://github.com/devorbitus/vnproofer#readme",
   "devDependencies": {
-    "jest": "^26.6.3",
-    "line-number": "^0.1.0"
+    "jest": "^26.6.3"
   },
   "dependencies": {
+    "app-root-path": "^3.0.0",
     "cli-progress": "^3.9.0",
     "escape-string-regexp": "^2.0.0",
     "kleur": "^3.0.3",
+    "line-number": "^0.1.0",
     "node-fetch": "^2.6.1",
     "parse-diff": "^0.8.1",
     "prompts": "^2.4.1",
