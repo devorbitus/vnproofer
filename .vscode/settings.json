@@ -1,4 +1,6 @@
 {
     "markyMarkdown.updateOnSave": true,
-    "editor.tabSize": 2
+    "editor.tabSize": 2,
+    "javascript.preferences.quoteStyle": "single",
+    "javascript.updateImportsOnFileMove.enabled": "always"
 }
