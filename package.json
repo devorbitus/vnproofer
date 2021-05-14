@@ -7,7 +7,7 @@
     "start": "node src/vnproofer.mjs",
     "test": "jest",
     "patch": "git diff --no-ext-diff --quiet --exit-code && npm version --no-git-tag-version patch && npx genversion --es6 src/version.mjs",
-    "postversion": "git commit -a -m 'patch version increment' && git push && git push --tag"
+    "postversion": "sleep 5 && git commit -a -m 'patch version increment' && git push && git push --tag"
   },
   "repository": {
     "type": "git",
