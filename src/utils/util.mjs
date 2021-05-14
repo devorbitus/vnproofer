@@ -1,4 +1,6 @@
 import kleur from "kleur";
+import shelljs from 'shelljs';
+const { which } = shelljs;
 const spellingErrorRegex = /^(?<filePath>.+):(?<lineNumber>\d+):(?<columnNumber>\d+)\s+-\s+.+\((?<misspelledWord>\w+)\)(?:\s+--)?\s?(?<wordContext>.+)?/gm;
 
 export function getMatches(stringToSearch, regexToSearchWith, matchArray = []) {
@@ -56,8 +58,17 @@ export function handleSpellingResults(spellingResults) {
   }
 }
 
-export function printSpellingLines(lines){
+export function printSpellingLines(lines) {
   lines.forEach(line => {
     console.log(`${line}`);
   });
+}
+
+export function cSpellExistsChecker(callbackFunc) {
+  var cSpellWhich = which('cspell');
+  if (cSpellWhich?.code !== 0) {
+    console.log(kleur.red('A global installation of cspell is required! Install using \"npm install -g cspell\"'));
+  } else {
+    callbackFunc();
+  }
 }
