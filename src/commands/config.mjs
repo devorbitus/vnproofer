@@ -4,6 +4,7 @@ import fetch from 'node-fetch';
 import prompt from 'prompts';
 import shelljs from 'shelljs';
 import cliProgress from 'cli-progress';
+import { getMatches } from '../utils/util.mjs';
 const { echo, grep, find } = shelljs;
 const templateUrl = "https://raw.githubusercontent.com/devorbitus/vnproofer/main/cspell.empty.json"
 const charRegex = /define(?:\s+)?(?<charDef>\w+)?\s+=\s+Character(?:\(_)?(?:\s+)?\((?:\s+)?["|'](?<charName>[\w|\[|\]]+)["|']/gm;
@@ -140,8 +141,8 @@ async function charSummaryHandler(options, charHandler){
 
 function characterHandler(file, charHandler){
     const charNamesArray = charHandler.resultArray;
-    const declaredCharNames = extractCharacters(extractInformation(file, charRegex), charNamesArray);
-    const charNickNames = extractCharacters(extractInformation(file, nickNamesRegex), charNamesArray);
+    const declaredCharNames = extractCharacters(extractMatchesFromFile(file, charRegex), charNamesArray);
+    const charNickNames = extractCharacters(extractMatchesFromFile(file, nickNamesRegex), charNamesArray);
     const charNames = [...new Set([].concat(declaredCharNames, charNickNames))].sort();
     handler.resultArray = charNames;
 }
@@ -166,18 +167,11 @@ function extractCharacters(charMatches, charNames){
     return cleanCharNames;
 }
 
-function extractInformation(file, searchRegex, confirmRegex) {
+function extractMatchesFromFile(file, searchRegex) {
     let grepResults = grep('--', searchRegex, file).stdout;
-    const matches = [];
+    let matches = [];
     if (grepResults) {
-        let m;
-        while ((m = searchRegex.exec(grepResults)) !== null) {
-            // This is necessary to avoid infinite loops with zero-width matches
-            if (m.index === searchRegex.lastIndex) {
-                searchRegex.lastIndex++;
-            }
-            matches.push(m);
-        }
+        matches = getMatches(grepResults, searchRegex, matches);
     }
     return matches;
 }

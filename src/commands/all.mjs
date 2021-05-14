@@ -1,5 +1,6 @@
 import shelljs from 'shelljs';
 import kleur from "kleur";
+import { getMatches } from '../utils/util.mjs';
 const { which, exec } = shelljs;
 const spellingErrorRegex = /^(?<filePath>.+):(?<lineNumber>\d+):(?<columnNumber>\d+)\s+-\s+.+\((?<misspelledWord>\w+)\)(?:\s+--)?\s?(?<wordContext>.+)?/gm;
 
@@ -51,17 +52,4 @@ export async function handler (argv){
             console.log(kleur.green('No misspelled words detected!'));
         }
     }
-}
-
-function getMatches(stringToSearch, regexToSearchWith, matchArray = []){
-    let matches = matchArray;
-    let m;
-    while ((m = regexToSearchWith.exec(stringToSearch)) !== null) {
-        // This is necessary to avoid infinite loops with zero-width matches
-        if (m.index === regexToSearchWith.lastIndex) {
-            regexToSearchWith.lastIndex++;
-        }
-        matches.push(m);
-    }
-    return matches;
 }
