@@ -105,6 +105,9 @@ or
 vnproofer a
 ```
 
+#### Help
+
+
 ### Counts
 
 Query git to find out how many words and how many dialogue words have been committed since 1 am today
@@ -116,6 +119,22 @@ vnproofer counts
 or
 ```
 vnproofer n
+```
+#### Help
+
+```
+$ vnproofer counts --help
+vnproofer counts
+
+Query git to find out how many words have been committed today
+
+Options:
+  -v, --version         Show version number                                      [boolean]
+  -s, --suppress-intro  Suppress intro of command               [boolean] [default: false]
+  -m, --only-me         Only show my own counts                 [boolean] [default: false]
+  -b, --verbose         Show detailed logs of changes with word counts for examination
+                                                                [boolean] [default: false]
+  -h, --help            Show help                                                [boolean]
 ```
 
 ## Todo
