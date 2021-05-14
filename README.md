@@ -72,7 +72,15 @@ vnproofer config
 ```
 #### Help
 ```
+$ vnproofer config --help
+vnproofer config
 
+Configure vnproofer
+
+Options:
+  -v, --version         Show version number                                      [boolean]
+  -s, --suppress-intro  Suppress intro of command               [boolean] [default: false]
+  -h, --help            Show help                                                [boolean]
 ```
 
 ##### Sub Commands
