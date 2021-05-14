@@ -32,13 +32,13 @@ export async function handler (argv){
     const answers = await prompt(setupQuestions, {onCancel:cancelHandler, onSubmit:submitHandler});
     switch (answers.setupMenu) {
         case "createConfig":
-            createInitialConfig();
+            createInitialConfig(argv);
             break;
         case "cancel":
             console.log('Exiting');
             break;
         case "updateChar":
-            updateCharConfig();
+            updateCharConfig(argv);
             break;
         default:
             break;
@@ -63,11 +63,17 @@ class RenPyFileHandler {
     }
 }
 
-async function createInitialConfig(){
+async function createInitialConfig(argv){
+    if (!argv.suppressIntro) {
+        console.log(kleur.yellow('Creating initial cspell.json file...'));
+    }
     loopThroughRenpyFiles([new RenPyFileHandler(characterHandler,[],charSummaryHandler)], {initial: true});
 }
 
-function updateCharConfig(){
+function updateCharConfig(argv){
+    if (!argv.suppressIntro) {
+        console.log(kleur.yellow('Getting new character declarations and adding them to workspace dictionary...'));
+    }
     loopThroughRenpyFiles([new RenPyFileHandler(characterHandler,[],charSummaryHandler)], {initial: false});
 }
 
