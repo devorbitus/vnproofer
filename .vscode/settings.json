@@ -1,3 +1,4 @@
 {
-    "markyMarkdown.updateOnSave": true
+    "markyMarkdown.updateOnSave": true,
+    "editor.tabSize": 2
 }
