@@ -2,6 +2,7 @@ import kleur from "kleur";
 import fs from "fs";
 import shelljs from 'shelljs';
 const { exec } = shelljs;
+import { handleSpellingResults, printSpellingLines } from '../utils/util.mjs';
 
 export const command = "check <file>";
 export const describe = "check file for spelling errors";
@@ -23,10 +24,10 @@ export async function handler (argv) {
     }
 
     if (!fs.existsSync(argv.file) || argv.file === "." || argv.file ==="..") {
-        console.log('argv', JSON.stringify(argv,null,2))
-        console.log(kleur.red("There is no such file!"))
+        // console.log('argv', JSON.stringify(argv,null,2))
+        console.log(kleur.red(`File [ ${argv.file} ] does not exist.`))
         process.exit(1)
     }
-    var shellCheck = exec(`cspell --show-context ${argv.file}`).stdout;
-    // console.log("shellCheck", shellCheck);
+    const spellingResults = exec(`cspell --show-context --no-progress --no-summary ${argv.file}`, { silent: true }).stdout;
+    printSpellingLines(handleSpellingResults(spellingResults));
 }
