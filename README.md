@@ -7,11 +7,11 @@ VNProofer is a Command-line Ren'Py Visual Novel proofreading tool.
 - [Installation](#installation)
     - [Via NPM](#via-npm)
         - [Global installation:](#global-installation)
-        - [Local installation (as a dev tool for your project):](#local-installation-as-a-dev-tool-for-your-project)
 - [Usage](#usage)
     - [Help Menu](#help-menu)
     - [Config](#config)
         - [Command](#command)
+        - [Help](#help)
             - [Sub Commands](#sub-commands)
                 - [Initial Config](#initial-config)
                 - [Update character exclusions](#update-character-exclusions)
@@ -19,8 +19,10 @@ VNProofer is a Command-line Ren'Py Visual Novel proofreading tool.
         - [Command](#command)
     - [All](#all)
         - [Command](#command)
+        - [Help](#help)
     - [Counts](#counts)
         - [Command](#command)
+        - [Help](#help)
 - [Todo](#todo)
 <!-- /TOC -->
 
@@ -68,6 +70,10 @@ Displays the configuration menu
 ```
 vnproofer config
 ```
+#### Help
+```
+
+```
 
 ##### Sub Commands
 
@@ -106,7 +112,17 @@ vnproofer a
 ```
 
 #### Help
+```
+$ vnproofer all --help
+vnproofer all
 
+perform full spell check of all rpy files
+
+Options:
+  -v, --version         Show version number                                      [boolean]
+  -s, --suppress-intro  Suppress intro of command               [boolean] [default: false]
+  -h, --help            Show help                                                [boolean]
+```
 
 ### Counts
 
