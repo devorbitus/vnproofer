@@ -168,4 +168,4 @@ Options:
 - [ ] Ability to extract from `*.rpa` files
 - [ ] Ability to extract from `*.rpyc` files
 - [ ] Ability to automatically generate a corrections file to be sent to an author to facilitate automatically correcting issues
-- [ ] Ability to automatically add reccomended VSCode extensions for Ren'Py
+- [ ] Ability to automatically add recommended VSCode extensions for Ren'Py
