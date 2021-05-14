@@ -9,6 +9,7 @@
         "luquedaniel.languague-renpy",
         "visualstudioexptteam.vscodeintellicode",
         "streetsidesoftware.code-spell-checker",
-        "znck.grammarly"
+        "znck.grammarly",
+        "bierner.markdown-preview-github-styles"
     ]
 }
