@@ -2,8 +2,7 @@
 
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import {readPackageSync} from 'read-pkg';
-const version = process.env.npm_package_version || readPackageSync().version;
+import { version } from 'version';
 import { commands } from './commands/index.mjs';
 
 yargs(hideBin(process.argv))

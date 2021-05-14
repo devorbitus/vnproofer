@@ -5,7 +5,9 @@
   "main": "src/vnproofer.mjs",
   "scripts": {
     "start": "node src/vnproofer.mjs",
-    "test": "jest"
+    "test": "jest",
+    "patch": "git diff --no-ext-diff --quiet --exit-code && npm version --no-git-tag-version patch && npx genversion --es6 src/version.mjs",
+    "postversion": "git commit -a -m 'patch version increment' && git push && git push --tag"
   },
   "repository": {
     "type": "git",
@@ -25,6 +27,7 @@
   },
   "homepage": "https://github.com/devorbitus/vnproofer#readme",
   "devDependencies": {
+    "genversion": "^2.3.1",
     "jest": "^26.6.3"
   },
   "dependencies": {
