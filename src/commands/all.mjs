@@ -12,7 +12,7 @@ export async function handler (argv){
         console.log(kleur.red('A global installation of cspell is required! Install using \"npm install -g cspell\"'));
     } else {
         // should we suppress intro
-        if (!argv.s) {
+        if (!argv.suppressIntro) {
             console.log(kleur.yellow('Checking all files for spelling errors...'));
         }
         let spellingResults = exec(`cspell --show-context --no-progress --no-summary "**/*.rpy"`, {silent:true}).stdout;
