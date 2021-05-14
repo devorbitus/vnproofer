@@ -31,7 +31,6 @@
     "jest": "^26.6.3"
   },
   "dependencies": {
-    "app-root-path": "^3.0.0",
     "cli-progress": "^3.9.0",
     "escape-string-regexp": "^2.0.0",
     "kleur": "^3.0.3",
