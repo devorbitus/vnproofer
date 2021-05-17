@@ -40,6 +40,7 @@
     "prompts": "^2.4.1",
     "read-pkg": "^6.0.0",
     "shelljs": "^0.8.4",
+    "update-notifier": "^5.1.0",
     "yargs": "^17.0.1"
   },
   "type": "module",

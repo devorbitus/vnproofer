@@ -1,5 +1,7 @@
 import kleur from "kleur";
 import shelljs from 'shelljs';
+import { version } from '../version.mjs';
+import updateNotifier from 'update-notifier';
 const { which } = shelljs;
 const spellingErrorRegex = /^(?<filePath>.+):(?<lineNumber>\d+):(?<columnNumber>\d+)\s+-\s+.+\((?<misspelledWord>\w+)\)(?:\s+--)?\s?(?<wordContext>.+)?/gm;
 
@@ -71,4 +73,9 @@ export function cSpellExistsChecker(callbackFunc) {
   } else {
     callbackFunc();
   }
+}
+
+export function checkForUpdatesHandler(){
+  const notifier = updateNotifier({pkg:{name:'vnproofer', version:version}});
+  notifier.notify({isGlobal:true});
 }

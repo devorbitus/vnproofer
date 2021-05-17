@@ -4,6 +4,9 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { version } from './version.mjs';
 import { commands } from './commands/index.mjs';
+import { checkForUpdatesHandler } from './utils/util.mjs'
+
+checkForUpdatesHandler();
 
 yargs(hideBin(process.argv))
     .command(commands)
