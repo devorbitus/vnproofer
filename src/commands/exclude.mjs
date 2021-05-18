@@ -19,7 +19,6 @@ export async function handler(argv) {
     if (!argv.suppressIntro) {
       console.log(kleur.yellow('Adding misspelled word to exclusion list...'));
     }
-    console.log(`Do something with file [ ${argv.file} ] and word {${argv.word}}`);
     addExclusionToFile(argv.file, argv.word);
   });
 }
