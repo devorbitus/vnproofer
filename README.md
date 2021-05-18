@@ -164,7 +164,7 @@ Options:
 ## Todo
 - [x] Utility to show how many words added as well as how many dialog words have been added today by pulling all changes added to a git repo
 - [ ] Ability to automatically add the [cSpell GitHub action](https://github.com/marketplace/actions/cspell-action) to an existing codebase
-- [ ] Ability to add words misspelled on purpose to an exclusion list at the top of the file
+- [x] Ability to add words misspelled on purpose to an exclusion list at the top of the file
 - [ ] Ability to add file-level excluded words to the local dictionary if the exclusion is used in more than one file and remove the local exclusion from all files
 - [ ] Ability to iterate over each misspelled word and choose how to handle it (add to file level exclusion, add to the local dictionary)
 - [ ] Ability to iterate over all-new dialogue (like a new pull request to review)
