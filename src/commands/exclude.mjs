@@ -5,7 +5,7 @@ export const describe = "Handle words that are spelled wrong on purpose";
 export const aliases = ['e'];
 export function builder(yargs) {
   yargs.positional('file', {
-    describe: "File that has the misspelled word",
+    describe: "File path that has the misspelled word",
     type: 'string'
   }).positional('word', {
     describe: 'Word to exclude from misspelled words within file',
