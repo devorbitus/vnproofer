@@ -1,9 +1,13 @@
 import kleur from "kleur";
 import shelljs from 'shelljs';
+import ln from 'line-number';
+import insertLine from 'insert-line';
+import fs from "fs";
 import { version } from '../version.mjs';
 import updateNotifier from 'update-notifier';
 const { which } = shelljs;
 const spellingErrorRegex = /^(?<filePath>.+):(?<lineNumber>\d+):(?<columnNumber>\d+)\s+-\s+.+\((?<misspelledWord>\w+)\)(?:\s+--)?\s?(?<wordContext>.+)?/gm;
+const fileExclusionRegex = /cSpell:words (?<wordList>.+)$/mg;
 
 export function getMatches(stringToSearch, regexToSearchWith, matchArray = []) {
   let matches = matchArray;
@@ -75,7 +79,44 @@ export function cSpellExistsChecker(callbackFunc) {
   }
 }
 
-export function checkForUpdatesHandler(){
-  const notifier = updateNotifier({pkg:{name:'vnproofer', version:version}});
-  notifier.notify({isGlobal:true});
+export function checkForUpdatesHandler() {
+  const notifier = updateNotifier({ pkg: { name: 'vnproofer', version: version } });
+  notifier.notify({ isGlobal: true });
+}
+
+export function checkFileExists(file) {
+  if (!file) {
+      console.log(kleur.red('Please provide a file path.'))
+      process.exit(1);
+  }
+
+  if (!fs.existsSync(file) || file === "." || file === "..") {
+      // console.log('argv', JSON.stringify(argv, null, 2))
+      console.log(kleur.red(`File [ ${file} ] does not exist.`))
+      process.exit(1);
+  }
+}
+
+export function addExclusionToFile(file, word) {
+  let fileContents = fs.readFileSync(file, 'utf8');
+  let lineMatches = ln(fileContents, fileExclusionRegex);
+  if (lineMatches.length) {
+    const firstItem = lineMatches[0];
+    const matches = getMatches(firstItem.line, fileExclusionRegex);
+    const match = matches.length ? matches[0] : null;
+    if (match) {
+      if ('wordList' in match.groups) {
+        const wordListPerFile = match.groups.wordList;
+        const individualWordList = wordListPerFile.split(' ');
+        const lowercaseSortedCleanWordList = [...new Set([].concat(individualWordList,[word]))].map(word => word.toLowerCase());
+        lowercaseSortedCleanWordList.sort();
+        const newLine = `# cSpell:words ${lowercaseSortedCleanWordList.join(' ')}`;
+        const newFileContents = fileContents.replace(firstItem.line, newLine);
+        fs.writeFileSync(file, newFileContents);
+      }
+    }
+  } else {
+    console.log(`No existing word exclusions found for file ${file}`);
+    insertLine(file).prependSync(`# cSpell:words ${word}`);
+  }
 }
