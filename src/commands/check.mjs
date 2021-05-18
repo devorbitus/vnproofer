@@ -1,5 +1,4 @@
 import kleur from "kleur";
-import fs from "fs";
 import shelljs from 'shelljs';
 const { exec } = shelljs;
 import { handleSpellingResults, printSpellingLines, cSpellExistsChecker, checkFileExists } from '../utils/util.mjs';
