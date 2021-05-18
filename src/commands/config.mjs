@@ -11,11 +11,12 @@ const charRegex = /define(?:\s+)?(?<charDef>\w+)?\s+=\s+Character(?:\(_)?(?:\s+)
 const nickNamesRegex = /["|'].+\[(?<nickName>\w+)\].+["|']/gm;
 const dialogRegex = /^(?:\s+)?(?:\w+(?:\s+)?){0,3}["|'].+["|']/gm;
 const variableRegex = /^\s+\$(?:\s+)?(?<varName>\w+)(?:\s+)?=(?:\s+)?["|']\w+["|']/gm
+const fileExclusionRegex = /cSpell:words (?<wordList>.+)$/mg;
 
 export const command = "config";
 export const describe = "Configure vnproofer";
 
-export async function handler (argv){
+export async function handler(argv) {
     let cSpellConfigExists = fs.existsSync('cspell.json');
     console.log(kleur.green('Configuration Menu:'));
     console.log('');
@@ -30,7 +31,7 @@ export async function handler (argv){
             { title: 'Cancel', value: 'cancel'}
         ]
     }
-    const answers = await prompt(setupQuestions, {onCancel:cancelHandler, onSubmit:submitHandler});
+    const answers = await prompt(setupQuestions, { onCancel: cancelHandler, onSubmit: submitHandler });
     switch (answers.setupMenu) {
         case "createConfig":
             createInitialConfig(argv);
@@ -46,10 +47,10 @@ export async function handler (argv){
     }
     return argv;
 }
-function cancelHandler(){
+function cancelHandler() {
     console.log('User cancelled.');
 }
-async function submitHandler(){
+async function submitHandler() {
     // Do nothing
 }
 
@@ -64,21 +65,29 @@ class RenPyFileHandler {
     }
 }
 
-async function createInitialConfig(argv){
+async function createInitialConfig(argv) {
     if (!argv.suppressIntro) {
         console.log(kleur.yellow('Creating initial cspell.json file...'));
     }
-    loopThroughRenpyFiles([new RenPyFileHandler(characterHandler,[],charSummaryHandler)], {initial: true});
+    loopThroughRenpyFiles([new RenPyFileHandler(characterHandler, [], charSummaryHandler)], { initial: true });
 }
 
-function updateCharConfig(argv){
+function updateCharConfig(argv) {
     if (!argv.suppressIntro) {
         console.log(kleur.yellow('Getting new character declarations and adding them to workspace dictionary...'));
     }
-    loopThroughRenpyFiles([new RenPyFileHandler(characterHandler,[],charSummaryHandler)], {initial: false});
+    loopThroughRenpyFiles([new RenPyFileHandler(characterHandler, [], charSummaryHandler)], { initial: false });
 }
 
-async function getTemplateConfig(){
+function characterHandler(file, charHandler) {
+    const charNamesArray = charHandler.resultArray;
+    const declaredCharNames = extractCharacters(extractMatchesFromFile(file, charRegex), charNamesArray);
+    const charNickNames = extractCharacters(extractMatchesFromFile(file, nickNamesRegex), charNamesArray);
+    const charNames = [...new Set([].concat(declaredCharNames, charNickNames))].sort();
+    handler.resultArray = charNames;
+}
+
+async function getTemplateConfig() {
     let templateJson;
     try {
         const response = await fetch(templateUrl);
@@ -89,27 +98,27 @@ async function getTemplateConfig(){
     return templateJson;
 }
 
-function loopThroughRenpyFiles(handlers, options){
-    const allFilesFiltered = [...find('.').filter(file => file.endsWith('.rpy') )];
-    const rpyFileBar = new cliProgress.SingleBar({stopOnComplete:true}, cliProgress.Presets.shades_classic);
+function loopThroughRenpyFiles(handlers, options) {
+    const allFilesFiltered = [...find('.').filter(file => file.endsWith('.rpy'))];
+    const rpyFileBar = new cliProgress.SingleBar({ stopOnComplete: true }, cliProgress.Presets.shades_classic);
     let totalCount = allFilesFiltered.length;
     rpyFileBar.start(totalCount, 0);
-    allFilesFiltered.forEach( (file, ind) => {
+    allFilesFiltered.forEach((file, ind) => {
         rpyFileBar.update(ind + 1);
-        handlers.forEach( handler => handler.handle(file, handler));
+        handlers.forEach(handler => handler.handle(file, handler));
     });
-    handlers.forEach( handler => handler.finalize(options, handler));
+    handlers.forEach(handler => handler.finalize(options, handler));
     rpyFileBar.stop();
 }
 
-async function charSummaryHandler(options, charHandler){
+async function charSummaryHandler(options, charHandler) {
     const charNamesRaw = charHandler.resultArray;
     const charNames = [...new Set([].concat(charNamesRaw))].sort();
     charHandler.resultArray = charNames;
     if (options.initial) {
         let templateConfigJson = await getTemplateConfig();
         templateConfigJson.words.push(...charNames);
-        fs.writeFileSync('cspell.json',JSON.stringify(templateConfigJson,null,2));
+        fs.writeFileSync('cspell.json', JSON.stringify(templateConfigJson, null, 2));
         if (fs.existsSync('cspell.json')) {
             let hasCharNames = charNames.length > 0;
             const charNameMsg = ' and existing character names have been added to the dictionary';
@@ -120,16 +129,16 @@ async function charSummaryHandler(options, charHandler){
         }
     } else {
         let configJsonString = fs.readFileSync('cspell.json', 'utf8');
-        if(configJsonString){
+        if (configJsonString) {
             let configJson = JSON.parse(configJsonString);
             let existingWords = configJson.words;
             let updatedWordList = [...new Set([].concat(existingWords, charNames))].sort();
             let wordCountDiff = updatedWordList.length - existingWords.length;
             configJson.words = updatedWordList;
             console.log('');
-            if(wordCountDiff !== 0){
-                fs.writeFileSync('cspell.json',JSON.stringify(configJson,null,2));
-                console.log(kleur.cyan(`Successfully added ${wordCountDiff} new character${wordCountDiff > 1 ? 's':''}!`));
+            if (wordCountDiff !== 0) {
+                fs.writeFileSync('cspell.json', JSON.stringify(configJson, null, 2));
+                console.log(kleur.cyan(`Successfully added ${wordCountDiff} new character${wordCountDiff > 1 ? 's' : ''}!`));
             } else {
                 console.log(kleur.yellow('No new characters found to add so nothing to do'));
             }
@@ -139,15 +148,7 @@ async function charSummaryHandler(options, charHandler){
     }
 }
 
-function characterHandler(file, charHandler){
-    const charNamesArray = charHandler.resultArray;
-    const declaredCharNames = extractCharacters(extractMatchesFromFile(file, charRegex), charNamesArray);
-    const charNickNames = extractCharacters(extractMatchesFromFile(file, nickNamesRegex), charNamesArray);
-    const charNames = [...new Set([].concat(declaredCharNames, charNickNames))].sort();
-    handler.resultArray = charNames;
-}
-
-function extractCharacters(charMatches, charNames){
+function extractCharacters(charMatches, charNames) {
     for (const m of charMatches) {
         if ('charName' in m.groups) {
             let charName = m.groups.charName;
@@ -158,12 +159,12 @@ function extractCharacters(charMatches, charNames){
             let charVar = m.groups.charDef;
             if (charVar) charNames.push(charVar.toLowerCase());
         }
-        if('nickName' in m.groups) {
+        if ('nickName' in m.groups) {
             let charNickName = m.groups.nickName;
             if (charNickName) charNames.push(charNickName);
         }
     }
-    const cleanCharNames = [...new Set([].concat(charNames))];
+    const cleanCharNames = [...new Set(charNames)];
     return cleanCharNames;
 }
 
