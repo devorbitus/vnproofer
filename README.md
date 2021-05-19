@@ -33,6 +33,8 @@ VNProofer is a Command-line Ren'Py Visual Novel proofreading tool.
  - Ability to generate a cSpell configuration file for the Ren'Py visual novel
     - Character names are automatically added to the local dictionary
  - Ability to automatically add newly added characters to the local dictionary
+ - Ability to count both words added and dialogue words added today by examining git commit history
+ - Ability to add words misspelled on purpose to file level exclusion list
 
 ## Requirements
  - A copy of cspell must have been installed globally `npm i cspell -g` to do any spell checking
