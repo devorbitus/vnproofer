@@ -108,7 +108,8 @@ export function addExclusionToFile(file, word) {
       if ('wordList' in match.groups) {
         const wordListPerFile = match.groups.wordList;
         const individualWordList = wordListPerFile.split(' ');
-        const lowercaseSortedCleanWordList = [...new Set([].concat(individualWordList,[word]))].map(word => word.toLowerCase());
+        const passedWord = word.split(' ');
+        const lowercaseSortedCleanWordList = [...new Set([].concat(individualWordList, passedWord))].map(word => word.toLowerCase());
         lowercaseSortedCleanWordList.sort();
         const newLine = `# cSpell:words ${lowercaseSortedCleanWordList.join(' ')}`;
         const newFileContents = fileContents.replace(firstItem.line, newLine);
