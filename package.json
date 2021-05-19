@@ -46,6 +46,7 @@
   },
   "type": "module",
   "bin": {
-    "vnproofer": "src/vnproofer.mjs"
+    "vnproofer": "src/vnproofer.mjs",
+    "vnp": "src/vnproofer.mjs"
   }
 }
