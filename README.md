@@ -23,6 +23,9 @@ VNProofer is a Command-line Ren'Py Visual Novel proofreading tool.
   - [Counts](#counts)
     - [Counts Command](#counts-command)
     - [Counts Help](#counts-help)
+  - [Exclude](#exclude)
+    - [Exclude Command](#exclude-command)
+    - [Exclude Help](#exclude-help)
 - [Todo](#todo)
 <!-- /TOC -->
 
@@ -158,6 +161,35 @@ Options:
   -m, --only-me         Only show my own counts                 [boolean] [default: false]
   -b, --verbose         Show detailed logs of changes with word counts for examination
                                                                 [boolean] [default: false]
+  -h, --help            Show help                                                [boolean]
+```
+
+### Exclude
+
+Handle words that are spelled wrong on purpose. If there is already a word exclusion list at the top of the file, the command will add the lowercase version of the word to the existing list in alphabetical order. Otherwise, it will add a new exclusion to the top of the file.
+
+#### Exclude Command
+```
+vnproofer exclude ./myfile.rpy yall
+```
+or
+```
+vnproofer e ./myfile.rpy yall
+```
+#### Exclude Help
+```
+$ vnproofer exclude --help
+vnproofer exclude <file> <word>
+
+Handle words that are spelled wrong on purpose
+
+Positionals:
+  file  File path that has the misspelled word                         [string] [required]
+  word  Word to exclude from misspelled words within file              [string] [required]
+
+Options:
+  -v, --version         Show version number                                      [boolean]
+  -s, --suppress-intro  Suppress intro of command               [boolean] [default: false]
   -h, --help            Show help                                                [boolean]
 ```
 

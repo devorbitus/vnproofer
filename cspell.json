@@ -12,12 +12,14 @@
         "kleur",
         "mcname",
         "myfile",
+        "Positionals",
         "Ren'Py",
         "renpy",
         "Rosa",
         "rpyc",
         "Tom",
-        "vnproofer"
+        "vnproofer",
+        "yall"
     ],
     "showStatus": true,
     "ignorePaths": [

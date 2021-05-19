@@ -117,7 +117,7 @@ export function addExclusionToFile(file, word) {
       }
     }
   } else {
-    console.log(`No existing word exclusions found for file ${file}`);
+    console.log(`No existing word exclusions found for file ${file} so adding new exclusion`);
     insertLine(file).prependSync(`# cSpell:words ${word}`);
   }
 }
