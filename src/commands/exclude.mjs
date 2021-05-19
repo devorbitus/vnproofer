@@ -1,6 +1,6 @@
 import kleur from "kleur";
 import { cSpellExistsChecker, checkFileExists, addExclusionToFile } from '../utils/util.mjs';
-export const command = "exclusion <file> <word>";
+export const command = "exclude <file> <word>";
 export const describe = "Handle words that are spelled wrong on purpose";
 export const aliases = ['e'];
 export function builder(yargs) {
