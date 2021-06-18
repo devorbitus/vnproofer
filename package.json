@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "cli-progress": "^3.9.0",
-    "escape-string-regexp": "^2.0.0",
+    "escape-string-regexp": "^5.0.0",
     "insert-line": "^1.1.0",
     "kleur": "^3.0.3",
     "line-number": "^0.1.0",
