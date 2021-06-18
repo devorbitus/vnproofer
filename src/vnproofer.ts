@@ -1,15 +1,18 @@
 #!/usr/bin/env node
 
 import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
-import { version } from './version.mjs';
-import { commands } from './commands/index.mjs';
-import { checkForUpdatesHandler } from './utils/util.mjs'
+import { version } from './version';
+import { commands } from './commands/index';
+import { checkForUpdatesHandler } from './utils/util'
+import * as all from './commands/all'
+import * as cnt from './commands/counts'
+import CommandModule from 'yargs';
 
 checkForUpdatesHandler();
 
-yargs(hideBin(process.argv))
-    .command(commands)
+yargs(process.argv)
+    .command(all)
+    .command(cnt)
     .alias("h", "help")
     .version(`v${version}`)
     .alias("version", "v")

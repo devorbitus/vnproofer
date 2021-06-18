@@ -3,9 +3,10 @@ import fs from "fs";
 import fetch from 'node-fetch';
 import prompt from 'prompts';
 import shelljs from 'shelljs';
-import cliProgress from 'cli-progress';
-import { getMatches } from '../utils/util.mjs';
-const { echo, grep, find } = shelljs;
+import cliProgress from 'cli-progress'
+import { getMatches, GroupRegex } from '../utils/util';
+import { PathLike } from 'fs';
+const { grep, find } = shelljs;
 const templateUrl = "https://raw.githubusercontent.com/devorbitus/vnproofer/main/cspell.empty.json"
 const charRegex = /define(?:\s+)?(?<charDef>\w+)?\s+=\s+Character(?:\(_)?(?:\s+)?\((?:\s+)?["|'](?<charName>[\w|\[|\]]+)["|']/gm;
 const nickNamesRegex = /["|'].+\[(?<nickName>\w+)\].+["|']/gm;
@@ -16,11 +17,11 @@ const fileExclusionRegex = /cSpell:words (?<wordList>.+)$/mg;
 export const command = "config";
 export const describe = "Configure vnproofer";
 
-export async function handler(argv) {
+export async function handler(argv: any) {
     let cSpellConfigExists = fs.existsSync('cspell.json');
     console.log(kleur.green('Configuration Menu:'));
     console.log('');
-    let setupQuestions = {
+    let setupQuestions:prompt.PromptObject = {
         type: 'select',
         name: 'setupMenu',
         message: 'What would you like to do?',
@@ -30,7 +31,7 @@ export async function handler(argv) {
             { title: 'Update character exclusions', description: 'Add any new characters to workspace dictionary list', value: 'updateChar', disabled: !cSpellConfigExists },
             { title: 'Cancel', value: 'cancel'}
         ]
-    }
+    };
     const answers = await prompt(setupQuestions, { onCancel: cancelHandler, onSubmit: submitHandler });
     switch (answers.setupMenu) {
         case "createConfig":
@@ -55,35 +56,42 @@ async function submitHandler() {
 }
 
 class RenPyFileHandler {
-    handle;
-    resultArray;
-    finalize;
-    constructor(handle, resultArray, finalize) {
+    handle:RenPyFileHandleFunction;
+    resultArray:any[];
+    finalize:RenPyFileSummaryFunction;
+    constructor(handle:RenPyFileHandleFunction, resultArray:any[], finalize:RenPyFileSummaryFunction) {
         this.handle = handle;
         this.resultArray = resultArray;
         this.finalize = finalize;
     }
 }
 
-async function createInitialConfig(argv) {
+async function createInitialConfig(argv: { suppressIntro: any; }) {
     if (!argv.suppressIntro) {
         console.log(kleur.yellow('Creating initial cspell.json file...'));
     }
     loopThroughRenpyFiles([new RenPyFileHandler(characterHandler, [], charSummaryHandler)], { initial: true });
 }
 
-function updateCharConfig(argv) {
+function updateCharConfig(argv: { suppressIntro: any; }) {
     if (!argv.suppressIntro) {
         console.log(kleur.yellow('Getting new character declarations and adding them to workspace dictionary...'));
     }
     loopThroughRenpyFiles([new RenPyFileHandler(characterHandler, [], charSummaryHandler)], { initial: false });
 }
 
-function characterHandler(file, charHandler) {
-    const charNamesArray = charHandler.resultArray;
-    const declaredCharNames = extractCharacters(extractMatchesFromFile(file, charRegex), charNamesArray);
-    const charNickNames = extractCharacters(extractMatchesFromFile(file, nickNamesRegex), charNamesArray);
-    const charNames = [...new Set([].concat(declaredCharNames, charNickNames))].sort();
+type RenPyFileHandleFunction = (file:PathLike, handler:RenPyFileHandler) => void;
+
+interface RenPyFileHandlerHandler {
+    file:PathLike
+    handler:RenPyFileHandler
+}
+
+function characterHandler(file:PathLike, handler:RenPyFileHandler) {
+    const charNamesArray:any[] = handler.resultArray;
+    const declaredCharNames:string[] = extractCharacters(extractMatchesFromFile(file, charRegex), charNamesArray);
+    const charNickNames:string[] = extractCharacters(extractMatchesFromFile(file, nickNamesRegex), charNamesArray);
+    const charNames:string[] = [...new Set(([] as string[]).concat(declaredCharNames, charNickNames))].sort();
     handler.resultArray = charNames;
 }
 
@@ -98,7 +106,7 @@ async function getTemplateConfig() {
     return templateJson;
 }
 
-function loopThroughRenpyFiles(handlers, options) {
+function loopThroughRenpyFiles(handlers:RenPyFileHandler[], options: { initial: boolean; }) {
     const allFilesFiltered = [...find('.').filter(file => file.endsWith('.rpy'))];
     const rpyFileBar = new cliProgress.SingleBar({ stopOnComplete: true }, cliProgress.Presets.shades_classic);
     let totalCount = allFilesFiltered.length;
@@ -111,9 +119,11 @@ function loopThroughRenpyFiles(handlers, options) {
     rpyFileBar.stop();
 }
 
-async function charSummaryHandler(options, charHandler) {
-    const charNamesRaw = charHandler.resultArray;
-    const charNames = [...new Set([].concat(charNamesRaw))].sort();
+type RenPyFileSummaryFunction = (options: { initial: boolean; }, charHandler: { resultArray: string[]; }) => void;
+
+async function charSummaryHandler(options: { initial: boolean; }, charHandler: { resultArray: string[]; }) {
+    const charNamesRaw:string[] = charHandler.resultArray;
+    const charNames:string[] = [...new Set(([] as string[]).concat(charNamesRaw))].sort();
     charHandler.resultArray = charNames;
     if (options.initial) {
         let templateConfigJson = await getTemplateConfig();
@@ -131,8 +141,8 @@ async function charSummaryHandler(options, charHandler) {
         let configJsonString = fs.readFileSync('cspell.json', 'utf8');
         if (configJsonString) {
             let configJson = JSON.parse(configJsonString);
-            let existingWords = configJson.words;
-            let updatedWordList = [...new Set([].concat(existingWords, charNames))].sort();
+            let existingWords:string[] = configJson.words;
+            let updatedWordList = [...new Set(([] as string[]).concat(existingWords, charNames))].sort();
             let wordCountDiff = updatedWordList.length - existingWords.length;
             configJson.words = updatedWordList;
             console.log('');
@@ -148,7 +158,7 @@ async function charSummaryHandler(options, charHandler) {
     }
 }
 
-function extractCharacters(charMatches, charNames) {
+function extractCharacters(charMatches:GroupRegex[], charNames:string[]) {
     for (const m of charMatches) {
         if ('charName' in m.groups) {
             let charName = m.groups.charName;
@@ -168,9 +178,9 @@ function extractCharacters(charMatches, charNames) {
     return cleanCharNames;
 }
 
-function extractMatchesFromFile(file, searchRegex) {
-    let grepResults = grep('--', searchRegex, file).stdout;
-    let matches = [];
+function extractMatchesFromFile(file:PathLike, searchRegex:RegExp):GroupRegex[] {
+    let grepResults:string = grep('--', searchRegex, file as string).stdout;
+    let matches:GroupRegex[] = [];
     if (grepResults) {
         matches = getMatches(grepResults, searchRegex, matches);
     }
