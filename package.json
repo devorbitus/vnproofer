@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/devorbitus/vnproofer#readme",
   "devDependencies": {
-    "genversion": "^2.3.1",
+    "genversion": "^3.0.0",
     "jest": "^27.0.4"
   },
   "dependencies": {
